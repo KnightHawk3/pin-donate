@@ -1,0 +1,13 @@
+{
+  "production": {
+    "api_endpoint": "api.pin.net.au",
+    "publishable_key": "",
+    "secret_key": ""
+  },
+
+  "testing": {
+    "api_endpoint": "test-api.pin.net.au",
+    "publishable_key": "",
+    "secret_key": ""
+  }
+}

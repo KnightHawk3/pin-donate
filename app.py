@@ -58,6 +58,7 @@ class DonateHandler(tornado.web.RequestHandler):
         )
         response = yield tornado.gen.Task(http_client.fetch, req)
         logging.debug("%r" % response)
+        logging.debug("%r" % response.body)
 
         self.finish()
 

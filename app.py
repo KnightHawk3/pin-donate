@@ -3,6 +3,7 @@ import tornado.web
 import tornado.ioloop
 import logging
 import tornado.gen
+import decimal
 
 from decimal import Decimal
 from tornado.httpserver import HTTPServer
@@ -18,7 +19,8 @@ class DonateHandler(tornado.web.RequestHandler):
     def get(self):
         self.render('templates/donate.html', **{
             "api_endpoint": self.application.settings['api_endpoint'],
-            "publishable_key": self.application.settings['publishable_key']
+            "publishable_key": self.application.settings['publishable_key'],
+            "referer": self.request.headers.get('referer', None)
         })
 
     @asynchronous
@@ -30,7 +32,8 @@ class DonateHandler(tornado.web.RequestHandler):
         email = self.get_argument('email')
 
         # Convert dollar amount into cents
-        amount = str(Decimal(amount) * Decimal(100))
+        amount = str((Decimal(amount) * Decimal(100))
+                   .quantize(Decimal('1.'), rounding=decimal.ROUND_DOWN))
 
         currency = "AUD"
         description = "Pirate Party Donation"
@@ -44,17 +47,18 @@ class DonateHandler(tornado.web.RequestHandler):
             "currency": currency,
             "card_token": card_token
         }
+        logging.debug(repr(body))
 
         http_client = AsyncHTTPClient()
-        
+
         req = HTTPRequest("https://" + self.application.settings['api_endpoint'] + "/1/charges",
                 method="POST",
                 body=urlencode(body),
                 auth_username=key
         )
         response = yield tornado.gen.Task(http_client.fetch, req)
-        
         logging.debug("%r" % response)
+
         self.finish()
 
 

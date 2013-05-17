@@ -1,196 +1,342 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset='utf-8'>
-    <title>Donate</title>
-    <link type="text/css" rel="stylesheet" href="/static/bootstrap.min.css">
-    <link type="text/css" rel="stylesheet" href="/static/bootstrap-responsive.min.css">
-    <script src="https://{{api_endpoint}}/pin.js"></script>
-    <script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
-    <script>
+    
+    <head>
+        <meta charset='utf-8'>
+        <title>Donate</title>
+        <link type="text/css" rel="stylesheet" href="/static/bootstrap.min.css">
+        <link type="text/css" rel="stylesheet" href="/static/bootstrap-responsive.min.css">
+        <link rel="stylesheet" type="text/css" href="/static/webfonts.css">
+        <link rel="stylesheet" type="text/css" href="/static/logo.css">
+        <style>
+body { background-color: #0073ae; padding: 0; }
+h2, h4, legend { font-family: "GehenSans"; }
+.container {
+background-color: white;
+padding: 1em;
+border: 1px solid gray;
+box-shadow: 0px 0px 25px black;
+max-width: 860px;
+}
+[class*="span"] {
+max-width: 860px;
+}
+.checkbox, .radio {
+margin-left: 3em;
+}
+.alert {
+margin-top: 1em;
+margin-bottom: 1em;
+}
+.noscript {
+display: none;
+}
 
-      $(function() {
+@media (min-width: 768px) {
+.span1 { width: 70px !important; } 
+.span2 { width: 140px !important; } 
+.span3 { width: 210px !important; } 
+.span4 { width: 280px !important; } 
+.span5 { width: 350px !important; } 
+.span6 { width: 420px !important; } 
+}
+</style>
+        <script src="https://{{api_endpoint}}/pin.js"></script>
+        <script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
+        <script>
+            $(function () {
 
-      Pin.setPublishableKey('{{publishable_key}}');
-  // Now we can call Pin.js on form submission to retrieve a card token and submit
-  // it to the server
+                Pin.setPublishableKey('{{publishable_key}}');
+                // Now we can call Pin.js on form submission to retrieve a card token and submit
+                // it to the server
 
-  var $form = $('form'),
-      $submitButton = $form.find(":submit"),
-      $errors = $form.find('.errors');
+                var $form = $('form'),
+                    $submitButton = $form.find(":submit"),
+                    $errors = $form.find('.errors');
 
-  $form.submit(function(e) {
+                $form.submit(function (e) {
 
-    e.preventDefault();
-    $errors.hide();
+                    e.preventDefault();
+                    $errors.hide();
 
-    // Disable the submit button to prevent multiple clicks
-    $submitButton.attr({disabled: true});
+                    // Disable the submit button to prevent multiple clicks
+                    $submitButton.attr({
+                        disabled: true
+                    });
 
-    // Fetch details required for the createToken call to Pin
-    var card = {
-      number: $('#cc-number').val(),
-      name: $('#cc-name').val(),
-      expiry_month: $('#cc-expiry-month').val(),
-      expiry_year: $('#cc-expiry-year').val(),
-      cvc: $('#cc-cvc').val(),
-      address_line1: $('#address-line1').val(),
-      address_line2: $('#address-line2').val(),
-      address_city: $('#address-city').val(),
-      address_state: $('#address-state').val(),
-      address_postcode: $('#address-postcode').val(),
-      address_country: $('#address-country').val()
-    };
+                    // Fetch details required for the createToken call to Pin
+                    var card = {
+                        number: $('#number').val(),
+                        name: $('#name').val(),
+                        expiry_month: $('#expiry_month').val(),
+                        expiry_year: $('#expiry_year').val(),
+                        cvc: $('#cvc').val(),
+                        address_line1: $('#address_line1').val(),
+                        address_line2: $('#address_line2').val(),
+                        address_city: $('#address_city').val(),
+                        address_state: $('#address_state').val(),
+                        address_postcode: $('#address_postcode').val(),
+                        address_country: $('#address_country').val()
+                    };
 
-    // Request a token for the card from Pin
-    Pin.createToken(card, handlePinResponse);
-  });
+                    var hasError = false;
+                    for (var prop in card) {
+                      if (card[prop] == null || card[prop] === "") {
+                        if (prop == "address_line2") {
+                          continue;
+                        }
+                        hasError = true;
+                        $("#" + prop).closest(".control-group").addClass("error");
+                      }
+                    }
 
-  function handlePinResponse(response) {
-    var $form = $('form');
+                    if ($("#donation-amount").val() == "" || $("#donation-amount").val() == null ||
+                          parseFloat($("#donation-amount").val()) < 5) {
+                        hasError = true;
+                        $("#donation-amount").closest(".control-group").addClass("error");
+                    }
+                    
+                    if ($("#email").val() == "" || $("#email").val() == null) {
+                        hasError = true;
+                        $("#email").closest(".control-group").addClass("error");
+                    }
+                    
+                    if (hasError) {
+                      $(".error").first().find("input, select").focus();
+                      $submitButton.attr({
+                        disabled: false
+                      });
+                      return;
+                    }
 
-    if (response.response) {
-      // Add the card token and ip address of the customer to the form
-      // You will need to post these to Pin when creating the charge.
-      $('<input>')
-        .attr({type: 'hidden', name: 'card_token'})
-        .val(response.response.token)
-        .appendTo($form);
-      $('<input>')
-        .attr({type: 'hidden', name: 'ip_address'})
-        .val(response.ip_address)
-        .appendTo($form);
+                    // Request a token for the card from Pin
+                    Pin.createToken(card, handlePinResponse);
+                });
 
-      // Resubmit the form
-      $form.get(0).submit();
+                function handlePinResponse(response) {
+                    var $form = $('form');
 
-    } else {
-      var $errorList = $errors.find('ul');
+                    if (response.response) {
+                        // Add the card token and ip address of the customer to the form
+                        // You will need to post these to Pin when creating the charge.
+                        $('<input>')
+                            .attr({
+                            type: 'hidden',
+                            name: 'card_token'
+                        })
+                            .val(response.response.token)
+                            .appendTo($form);
+                        $('<input>')
+                            .attr({
+                            type: 'hidden',
+                            name: 'ip_address'
+                        })
+                            .val(response.ip_address)
+                            .appendTo($form);
 
-      $errors.find('h3').text(response.error_description);
-      $errorList.empty();
+                        // Resubmit the form
+                        $form.get(0).submit();
 
-      $.each(response.messages, function(index, errorMessage) {
-        $('<li>').text(errorMessage.param + ": " + errorMessage.message).appendTo($errorList);
-      });
+                    } else {
+                        $errors.find('h3').text(response.error_description);
+                        $(".error").removeClass('error');
 
-      $errors.show();
-      $submitButton.removeAttr('disabled');
-    }
-  };
-});
-    </script>
-  </head>
-  <body>
-    <div class="container">
-      <form method='post'>
-        <div class='errors' style='display:none'>
-          <h3></h3>
-          <ul></ul>
+                        $.each(response.messages, function (index, errorMessage) {
+                            var node = $("#" + errorMessage.param);
+                            node.closest(".control-group").addClass("error");
+                        });
+
+                        $submitButton.removeAttr('disabled');
+                        $(".error").first().find("input, select").focus();
+                    }
+                };
+            });
+          </script>
+          <style>
+.control-group .help-inline {
+  display: none;
+}
+
+.control-group.error .help-inline {
+  display: inline-block;
+  font-size: 14px;
+}
+
+.well { height: 100%; }
+          </style>
+
+    </head>
+    
+    <body>
+        <div class="container">
+<div style="min-height: 80px">
+<h1>
+<a href="http://pirateparty.org.au" class="logo">
+<div>
+<span class="logo-bold-blue">pirate</span>party
+</div>
+<div class="logo-australia">Donation Portal</div>
+</a>
+</h1>
+</div>
+          <form method='post'>
+                {% if referer %}
+                <input type="hidden" name="referer" value="{{referer}}">
+                {% end %}
+                <div class="row">
+                  <div class='span12'>
+                      <div class='alert alert-info'>
+                        Please enter a donation amount ($5 minimum).
+                        </div>
+                            <div class="control-group">
+                                <label class="control-label" for="donation-amount">Donation Amount</label>
+                                <div class="controls input-prepend"> 
+                                    <span class="add-on">$</span>
+                                    <input type="text" class="span1" id="donation-amount" name='amount' value="25">
+                                    <span class="help-inline">Please enter an amount ($5 or more)</span>
+                                </div>
+                            </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class='span12'>
+                    <h2>Billing Details</h2>
+                            <div class="control-group">
+                                <label class="control-label" for="address_line1">Address</label>
+                                <div class="controls">
+                                    <input type="text" class="span6" id="address_line1">
+                                    <span class="help-inline">Address cannot be blank.</span>
+                                </div>
+                            </div>
+                            <div class="control-group">
+                                <label class="control-label" style="display:none" for="address_line2">Address - line 2</label>
+                                <div class="controls">
+                                    <input type="text" class="span6" id="address_line2">
+                                </div>
+                            </div>
+                            <div class='row'>
+                                <div class='span2'>
+                                    <div class="control-group">
+                                        <label class="control-label" for="address_city">Suburb</label>
+                                        <div class="controls">
+                                            <input type="text" class="span2" id="address_city">
+                                            <span class="help-inline">Suburb cannot be blank.</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="span1">
+                                    <div class="control-group">
+                                        <label class="control-label" for="address_state">State</label>
+                                        <div class="controls">
+                                            <input type="text" class="span1" id="address_state">
+                                            <span class="help-inline">State cannot be blank.</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="span1">
+                                    <div class="control-group">
+                                        <label class="control-label" for="address_postcode">Postcode</label>
+                                        <div class="controls">
+                                            <input type="text" class="span1" id="address_postcode">
+                                            <span class="help-inline">Postcode cannot be blank.</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="control-group">
+                                <label class="control-label" for="address_country">Country</label>
+                                <div class="controls">
+                                    <input type="text" class="span3" id="address_country" value="Australia">
+                                    <span class="help-inline">Country cannot be blank.</span>
+                                </div>
+                            </div>
+                            <div class="control-group">
+                                <label class="control-label" for="email">Email</label>
+                                <div class="controls">
+                                    <input type="email" id="email" name="email" class="span3">
+                                    <span class="help-inline">Email address cannot be blank.</span>
+                                </div>
+                            </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class='span12'>
+                    <h2>Credit/Debit Card Details</h2>
+                            <div class="control-group">
+                                <label class="control-label" for="number">Credit/Debit Card Number</label>
+                                <div class="controls">
+                                    <input type="text" class="span4" id="number">
+                                    <span class="help-inline">Please enter a valid number.</span>
+                                </div>
+                            </div>
+                            <div class="control-group">
+                                <label class="control-label" for="name">Full Name</label>
+                                <div class="controls">
+                                    <input type="text" class="span4" id="name">
+                                    <span class="help-inline">Full name cannot be blank.</span>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="span1">
+                                    <div class="control-group">
+                                        <label class="control-label" for="expiry_month">Month</label>
+                                        <div class="controls">
+                                            <select id="expiry_month" class="span1">
+                                                <option value="01">01</option>
+                                                <option value="02">02</option>
+                                                <option value="03">03</option>
+                                                <option value="04">04</option>
+                                                <option value="05">05</option>
+                                                <option value="06">06</option>
+                                                <option value="07">07</option>
+                                                <option value="08">08</option>
+                                                <option value="09">09</option>
+                                                <option value="10">10</option>
+                                                <option value="11">11</option>
+                                                <option value="12">12</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="span1">
+                                    <div class="control-group">
+                                        <label class="control-label" for="expiry_year">Year</label>
+                                        <div class="controls">
+                                            <select id="expiry_year" class="span1"></select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="span3">
+                                    <div class="control-group">
+                                        <label class="control-label" for="cvc">CVV</label>
+                                        <div class="controls">
+                                            <input type="text" class="span1" id="cvc">
+                                            <span class="help-inline">Enter a valid CVV/CVC.</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="alert alert-danger" style="text-align: center">
+                              <input type="submit" class="btn btn-primary">
+                            </div>
+                    </div>
+                </div>
+            </form>
         </div>
-        <fieldset>
-          <legend>Donation</legend>
-          
-          <div class="control-group">
-            <label class="control-label" for="donation-amount">Donation Amount</label>
-            <div class="controls">
-              $<input type="text" id="donation-amount" name='amount'>
-            </div>
-          </div>
-          
-          <div class="control-group">
-            <label class="control-label" for="email">Email</label>
-            <div class="controls">
-              <input type="email" id="email" name="email">
-            </div>
-          </div>
-        </fieldset>
+        <script>
+            var thisYear = new Date().getFullYear(),
+                node = $("#expiry_year");
+            for (var i = thisYear; i < thisYear + 12; ++i) {
+                $(document.createElement('option')).attr('value', i).text(i)
+                    .appendTo(node);
 
-        <fieldset>
-          <legend>Billing</legend>
+            }
+            $("input, select").change(function() {
+              if ($(this).val() != "" && $(this).val() != null) {
+                $(this).closest('.error').removeClass('error');
+              }
+            });
+        </script>
+    </body>
 
-          <div class="control-group">
-            <label class="control-label" for="address-line1">Address 1</label>
-            <div class="controls">
-              <input type="text" id="address-line1">
-            </div>
-          </div>
-
-          <div class="control-group">
-            <label class="control-label" for="address-line2">Address 2</label>
-            <div class="controls">
-              <input type="text" id="address-line2">
-            </div>
-          </div>
-
-          <div class="control-group">
-            <label class="control-label" for="address-city">Suburb</label>
-            <div class="controls">
-              <input type="text" id="address-city">
-            </div>
-          </div>
-
-          <div class="control-group">
-            <label class="control-label" for="address-state">State</label>
-            <div class="controls">
-              <input type="text" id="address-state">
-            </div>
-          </div>
-
-          <div class="control-group">
-            <label class="control-label" for="address-postcode">Postcode</label>
-            <div class="controls">
-              <input type="text" id="address-postcode">
-            </div>
-          </div>
-
-          <div class="control-group">
-            <label class="control-label" for="address-country">Country</label>
-            <div class="controls">
-              <input type="text" id="address-country">
-            </div>
-          </div>
-        </fieldset>
-        <fieldset>
-          <legend>Credit Card</legend>
-          <div class="control-group">
-            <label class="control-label" for="cc-number">Credit Card Number</label>
-            <div class="controls">
-              <input type="text" id="cc-number">
-            </div>
-          </div>
-
-          <div class="control-group">
-            <label class="control-label" for="cc-name">Full Name</label>
-            <div class="controls">
-              <input type="text" id="cc-name">
-            </div>
-          </div>
-
-          <div class="control-group">
-            <label class="control-label" for="cc-expiry-month">Expiry Month</label>
-            <div class="controls">
-              <input type="text" id="cc-expiry-month">
-            </div>
-          </div>
-
-          <div class="control-group">
-            <label class="control-label" for="cc-expiry-year">Expiry Year</label>
-            <div class="controls">
-              <input type="text" id="cc-expiry-year">
-            </div>
-          </div>
-
-          <div class="control-group">
-            <label class="control-label" for="cc-cvc">CVC</label>
-            <div class="controls">
-              <input type="text" id="cc-cvc">
-            </div>
-          </div>
-        </fieldset>
-
-        <input class="btn btn-primary" type="submit">
-      </form>
-    </div>
-  </body>
 </html>

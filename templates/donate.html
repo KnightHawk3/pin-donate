@@ -10,7 +10,6 @@
         <link rel="stylesheet" type="text/css" href="/static/webfonts.css">
         <link rel="stylesheet" type="text/css" href="/static/logo.css">
         <link rel="stylesheet" type="text/css" href="/static/style.css">
-        <!--[if lte IE 8]><script src="/static/json3.min.js"></script><![endif]-->
         <script src="/static/jquery-1.9.1.min.js"></script>
         <script src="/static/bootstrap.min.js"></script>
         <script src="https://{{api_endpoint}}/pin.js"></script>
@@ -150,7 +149,8 @@
 </a>
 </h1>
 </div>
-          <form method='post'>
+<noscript>This form requires JavaScript.</noscript>
+          <form method='post' style="display:none">
                 {% if referer %}
                 <input type="hidden" name="referer" value="{{referer}}">
                 {% end %}
@@ -335,6 +335,7 @@
             });
 
             $("#loading").modal({backdrop: "static", keyboard: false, show: false})
+            $("form").show();
         </script>
     </body>
 

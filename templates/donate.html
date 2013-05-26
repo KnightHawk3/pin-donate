@@ -34,6 +34,7 @@
                         disabled: true
                     });
                     $submitButton.val("Processing donation...");
+                    $("#loading").modal('show');
 
                     // Fetch details required for the createToken call to Pin
                     var card = {
@@ -78,6 +79,7 @@
                         disabled: false
                       });
                       $submitButton.val("Submit");
+                      $("#loading").modal('hide');
                       return;
                     }
 
@@ -120,6 +122,7 @@
 
                         $submitButton.removeAttr('disabled');
                         $submitButton.val("Submit");
+                        $("#loading").modal('hide');
                         $(".error").first().find("input, select").focus();
                     }
                 };
@@ -305,6 +308,17 @@
                 <a target="_blank" href="http://pirateparty.org.au/contact">Contact Us</a>
               </div>
         </div>
+        <div id='loading' class='modal hide fade'>
+          <div class='modal-header'>
+            <h3>Processing transaction...</h3>
+          </div>
+          <div class='modal-body'>
+            <p><strong>Please wait.</strong> This can take up to 30 seconds, and may take even longer on mobile devices.</p>
+            <div class="progress progress-striped active">
+              <div class="bar" style="width: 100%"></div>
+            </div>
+          </div>
+        </div>
         <script>
             var thisYear = new Date().getFullYear(),
                 node = $("#expiry_year");
@@ -318,6 +332,8 @@
                 $(this).closest('.error').removeClass('error');
               }
             });
+
+            $("#loading").modal({backdrop: "static", keyboard: false, show: false})
         </script>
     </body>
 

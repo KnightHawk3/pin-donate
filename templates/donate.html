@@ -10,6 +10,7 @@
         <link rel="stylesheet" type="text/css" href="/static/logo.css">
         <link rel="stylesheet" type="text/css" href="/static/style.css">
         <script src="/static/jquery-1.9.1.min.js"></script>
+        <script src="/static/bootstrap.min.js"></script>
         <script src="https://{{api_endpoint}}/pin.js"></script>
         <script>
             $(function () {
@@ -121,6 +122,8 @@
                         $(".error").first().find("input, select").focus();
                     }
                 };
+
+                $("[title]").tooltip({placement: "right", trigger: "focus"});
             });
           </script>
     </head>
@@ -143,7 +146,8 @@
                 {% end %}
                 <input type="hidden" name="nonce" value="{{nonce.uuid.hex}}">
                 <div class="alert flat alert-info">
-                   Thanks for donating to the Pirate Party!
+                  Thanks for donating to the Pirate Party!<br><br>
+                  All fields are mandatory unless otherwise specified.
                 </div>
                 <div class="row">
                   <div class='span6'>
@@ -175,7 +179,7 @@
                             <div class="control-group">
                                 <label class="control-label" style="display:none" for="address_line2">Address - line 2</label>
                                 <div class="controls">
-                                    <input type="text" class="span6" id="address_line2">
+                                    <input type="text" class="span6" placeholder="(optional)" id="address_line2">
                                 </div>
                             </div>
                             <div class='row'>
@@ -276,7 +280,7 @@
                                     <div class="control-group">
                                         <label class="control-label" for="cvc">CVV</label>
                                         <div class="controls">
-                                            <input type="text" class="span1" id="cvc">
+                                            <input type="text" class="span1" id="cvc" title="This 3-digit code can be found on the back of your credit/debit card.">
                                             <span class="help-inline">Enter a valid CVV/CVC.</span>
                                         </div>
                                     </div>

@@ -127,21 +127,24 @@ class DonateHandler(tornado.web.RequestHandler):
             data = json.loads(response.body.decode())
             if data.get('response'):
                 self.application.settings['receipts'].save(data['response'])
+                str_amount = str(Decimal(data['response']['amount']) / Decimal(100))
+                logger.info("Successful payment of $%s: %s" % (
+                    str_amount, data['response']['token']))
                 self.render("templates/receipt.html", **{
                     "token": data['response']['token'],
-                    "amount": str(Decimal(data['response']['amount']) / Decimal(100)),
+                    "amount": str_amount,
                     "mode": options.mode
                 })
             elif data.get('error'):
                 if data['error'] == "invalid_resource":
+                    logger.warn("Rejected card: %r" % data)
                     self.render("templates/rejected.html", **{"mode": options.mode})
             else:
                 raise Exception("Unexpected response body") # force exception
         except Exception as e:
             logger.error(e)
-            logger.error("Response body: %r" % response.body)
-            logger.error("Raw response: %r" % response)
-            logger.error("Email: %s" % email)
+            logger.error("Response body: %r\nRaw response: %r\nEmail: %s" % (
+                response.body, response, email))
             self.render("templates/error.html", **{"mode": options.mode})
 
 

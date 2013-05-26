@@ -130,6 +130,11 @@
     </head>
     
     <body>
+      {% if mode == "testing" %}
+      <div style="position: absolute; top: 2px; left: 2px; color: red; font-size: 30px">
+        TESTING MODE
+      </div>
+      {% end %}
         <div class="container">
 <div style="min-height: 80px">
 <h1>
@@ -137,7 +142,7 @@
 <div>
 <span class="logo-bold-blue">pirate</span>party
 </div>
-<div class="logo-australia">Donation Portal{% if mode == "testing" %} TEST MODE ENABLED{% end %}</div>
+<div class="logo-australia">Donation Portal</div>
 </a>
 </h1>
 </div>

@@ -152,6 +152,5 @@ if __name__ == "__main__":
         (r"/", DonateHandler)
     ], **settings)
 
-    http_server = HTTPServer(application)
-    http_server.listen(options.port, xheaders=True)
+    application.listen(options.port, xheaders=True)
     tornado.ioloop.IOLoop.instance().start()

@@ -15,6 +15,7 @@ from tornado.web import StaticFileHandler, asynchronous, HTTPError
 from tornado.options import define, options
 from urllib.parse import urlencode
 
+define("port", default=8888, help="Port number")
 define("config", default="./config.json", help="Config file")
 define("mode", default="testing", help="Deployment mode")
 
@@ -152,5 +153,5 @@ if __name__ == "__main__":
     ], **settings)
 
     http_server = HTTPServer(application)
-    http_server.listen(8888)
+    http_server.listen(options.port)
     tornado.ioloop.IOLoop.instance().start()

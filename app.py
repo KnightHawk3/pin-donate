@@ -20,7 +20,6 @@ define("config", default="./config.json", help="Config file")
 define("mode", default="testing", help="Deployment mode")
 
 logger = logging.getLogger('pindonate')
-logger.addHandler(MongoHandler(database_name="pindonate"))
 
 class Nonce:
     def __init__(self, **kwargs):
@@ -149,8 +148,11 @@ class DonateHandler(tornado.web.RequestHandler):
 if __name__ == "__main__":
     tornado.options.parse_command_line()
     settings = json.load(open(options.config))[options.mode]
-    settings['nonces'] = NonceManager(pymongo.Connection().pindonate.nonces)
-    settings['receipts'] = ReceiptManager(pymongo.Connection().pindonate.receipts)
+
+    dbname = settings['db']
+    logger.addHandler(MongoHandler(database_name=dbname))
+    settings['nonces'] = NonceManager(pymongo.Connection()[dbname].nonces)
+    settings['receipts'] = ReceiptManager(pymongo.Connection()[dbname].receipts)
 
     application = tornado.web.Application([
         (r"/static/(.*)", StaticFileHandler, {"path": "static"}),

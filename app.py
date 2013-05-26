@@ -9,16 +9,17 @@ import uuid
 import pymongo
 
 from decimal import Decimal
-from tornado.httpserver import HTTPServer
 from tornado.httpclient import AsyncHTTPClient, HTTPRequest
 from tornado.web import StaticFileHandler, asynchronous, HTTPError
 from tornado.options import define, options
 from urllib.parse import urlencode
+from log4mongo.handlers import MongoHandler
 
 define("port", default=8888, help="Port number")
 define("config", default="./config.json", help="Config file")
 define("mode", default="testing", help="Deployment mode")
 
+logging.getLogger().addHandler(MongoHandler(database_name="pindonate"))
 
 class Nonce:
     def __init__(self, **kwargs):
@@ -68,6 +69,7 @@ class ReceiptManager:
     def save(self, response):
         return self.collection.insert(response, safe=True)
 
+
 class DonateHandler(tornado.web.RequestHandler):
     def get(self):
         self.render('templates/donate.html', **{
@@ -106,7 +108,6 @@ class DonateHandler(tornado.web.RequestHandler):
             "currency": currency,
             "card_token": card_token
         }
-        logging.debug(repr(body))
 
         http_client = AsyncHTTPClient()
 
@@ -115,9 +116,12 @@ class DonateHandler(tornado.web.RequestHandler):
                 body=urlencode(body),
                 auth_username=key
         )
-        response = yield tornado.gen.Task(http_client.fetch, req)
-        logging.debug("%r" % response)
-        logging.debug("%r" % response.body)
+
+        try:
+            response = yield tornado.gen.Task(http_client.fetch, req)
+        except Exception as e:
+            logging.error(e)
+            self.render("templates/error.html", **{"mode": options.mode})
 
         try:
             data = json.loads(response.body.decode())

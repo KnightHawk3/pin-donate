@@ -8,6 +8,7 @@
         <link type="text/css" rel="stylesheet" href="/static/bootstrap-responsive.min.css">
         <link rel="stylesheet" type="text/css" href="/static/webfonts.css">
         <link rel="stylesheet" type="text/css" href="/static/logo.css">
+        <base target="_blank">
         <style>
 body { background-color: #0073ae; padding: 0; }
 h2, h4, legend { font-family: "GehenSans"; }
@@ -175,7 +176,7 @@ display: none;
 <div>
 <span class="logo-bold-blue">pirate</span>party
 </div>
-<div class="logo-australia">Donation Portal</div>
+<div class="logo-australia">Donation Portal{% if mode == "testing" %} TEST MODE ENABLED{% end %}</div>
 </a>
 </h1>
 </div>
@@ -183,20 +184,30 @@ display: none;
                 {% if referer %}
                 <input type="hidden" name="referer" value="{{referer}}">
                 {% end %}
+                <input type="hidden" name="nonce" value="{{nonce.uuid.hex}}">
                 <div class="row">
-                  <div class='span12'>
-                      <div class='alert alert-info'>
-                        Please enter a donation amount ($5 minimum).
-                        </div>
-                            <div class="control-group">
-                                <label class="control-label" for="donation-amount">Donation Amount</label>
-                                <div class="controls input-prepend"> 
-                                    <span class="add-on">$</span>
-                                    <input type="text" class="span1" id="donation-amount" name='amount' value="25">
-                                    <span class="help-inline">Please enter an amount ($5 or more)</span>
-                                </div>
-                            </div>
+                  <div class="span12">
+                    <div class="alert alert-info">
+                      Thanks for donating to the Pirate Party!
                     </div>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class='span6'>
+                      <div class='well'>
+                        Please enter a donation amount. ($5 minimum)
+                      </div>
+                  </div>
+                   <div class="span2">
+                     <div class="control-group">
+                       <label class="control-label" for="donation-amount"><strong>Donation Amount</strong></label>
+                       <div class="controls input-prepend"> 
+                         <span class="add-on">$</span>
+                         <input type="text" class="span1" id="donation-amount" name='amount' value="25">
+                         <span class="help-inline">Please enter an amount ($5 or more)</span>
+                       </div>
+                    </div>
+                  </div>
                 </div>
                 <div class="row">
                     <div class='span12'>
@@ -295,6 +306,7 @@ display: none;
                                                 <option value="11">11</option>
                                                 <option value="12">12</option>
                                             </select>
+                                            <span class="help-inline">Select the correct date.</span>
                                         </div>
                                     </div>
                                 </div>
@@ -303,6 +315,7 @@ display: none;
                                         <label class="control-label" for="expiry_year">Year</label>
                                         <div class="controls">
                                             <select id="expiry_year" class="span1"></select>
+                                            <span class="help-inline">Select the correct date.</span>
                                         </div>
                                     </div>
                                 </div>
@@ -321,7 +334,13 @@ display: none;
                             </div>
                     </div>
                 </div>
-            </form>
+              </form>
+              <div class='pull-right'>
+                
+                <a href="http://pirateparty.org.au/privacy">Privacy Policy</a>
+                |
+                <a href="http://pirateparty.org.au/contact">Contact Us</a>
+              </div>
         </div>
         <script>
             var thisYear = new Date().getFullYear(),

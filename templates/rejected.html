@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+    
+    <head>
+        <meta charset='utf-8'>
+        <title>Donate</title>
+        <link type="text/css" rel="stylesheet" href="/static/bootstrap.min.css">
+        <link type="text/css" rel="stylesheet" href="/static/bootstrap-responsive.min.css">
+        <link rel="stylesheet" type="text/css" href="/static/webfonts.css">
+        <link rel="stylesheet" type="text/css" href="/static/logo.css">
+        <style>
+body { background-color: #0073ae; padding: 0; }
+h2, h4, legend { font-family: "GehenSans"; }
+.container {
+background-color: white;
+padding: 1em;
+border: 1px solid gray;
+box-shadow: 0px 0px 25px black;
+max-width: 860px;
+}
+[class*="span"] {
+max-width: 860px;
+}
+.checkbox, .radio {
+margin-left: 3em;
+}
+.alert {
+margin-top: 1em;
+margin-bottom: 1em;
+}
+.noscript {
+display: none;
+}
+
+@media (min-width: 768px) {
+.span1 { width: 70px !important; } 
+.span2 { width: 140px !important; } 
+.span3 { width: 210px !important; } 
+.span4 { width: 280px !important; } 
+.span5 { width: 350px !important; } 
+.span6 { width: 420px !important; } 
+}
+</style>
+          <style>
+.control-group .help-inline {
+  display: none;
+}
+
+.control-group.error .help-inline {
+  display: inline-block;
+  font-size: 14px;
+}
+
+.well { height: 100%; }
+          </style>
+
+    </head>
+    
+    <body>
+        <div class="container">
+<div style="min-height: 80px">
+<h1>
+<a href="http://pirateparty.org.au" class="logo">
+<div>
+<span class="logo-bold-blue">pirate</span>party
+</div>
+<div class="logo-australia">Donation Portal{% if mode == "testing" %} TEST MODE ENABLED{% end %}</div>
+</a>
+</h1>
+</div>
+  
+  <div class="alert alert-danger">
+    <p><strong>Sorry, but it seems that your credit card was rejected.</strong></a>
+    <p>Unfortunately, there has been an error in processing your transaction. It looks like your provider has rejected the transaction. There may not be enough funds available in your account or you are over your credit limit.</p>
+    <p>If you believe this is an error on our end, please send us an email at <a href="mailto:enquiries@pirateparty.org.au">enquiries@pirateparty.org.au</a> and we'll help you out.</p>
+    <a class="btn btn-primary" href="/">Return to Donation Portal</a>
+  </div>
+
+
+</div>
+    
+</body>
+
+</html>

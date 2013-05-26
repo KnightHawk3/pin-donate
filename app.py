@@ -153,5 +153,5 @@ if __name__ == "__main__":
     ], **settings)
 
     http_server = HTTPServer(application)
-    http_server.listen(options.port)
+    http_server.listen(options.port, xheaders=True)
     tornado.ioloop.IOLoop.instance().start()

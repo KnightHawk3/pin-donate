@@ -64,6 +64,7 @@ display: none;
                     $submitButton.attr({
                         disabled: true
                     });
+                    $submitButton.val("Processing donation...");
 
                     // Fetch details required for the createToken call to Pin
                     var card = {
@@ -107,6 +108,7 @@ display: none;
                       $submitButton.attr({
                         disabled: false
                       });
+                      $submitButton.val("Submit");
                       return;
                     }
 
@@ -148,6 +150,7 @@ display: none;
                         });
 
                         $submitButton.removeAttr('disabled');
+                        $submitButton.val("Submit");
                         $(".error").first().find("input, select").focus();
                     }
                 };

@@ -19,7 +19,8 @@ define("port", default=8888, help="Port number")
 define("config", default="./config.json", help="Config file")
 define("mode", default="testing", help="Deployment mode")
 
-logging.getLogger().addHandler(MongoHandler(database_name="pindonate"))
+logger = logging.getLogger('pindonate')
+logger.addHandler(MongoHandler(database_name="pindonate"))
 
 class Nonce:
     def __init__(self, **kwargs):
@@ -48,17 +49,17 @@ class NonceManager:
         try:
             id = uuid.UUID(id)
         except:
-            logging.debug("%s is invalid" % id)
+            logger.debug("%s is invalid" % id)
             return False
 
         data = self.collection.find_one({"uuid": id})
         if data is None:
-            logging.debug("%r not found" % id)
+            logger.debug("%r not found" % id)
             return False
 
         nonce = Nonce(**data)
         self.collection.remove(data)
-        logging.debug("Expired: %s" % nonce.has_expired())
+        logger.debug("Expired: %s" % nonce.has_expired())
         return not nonce.has_expired()
 
 
@@ -120,7 +121,7 @@ class DonateHandler(tornado.web.RequestHandler):
         try:
             response = yield tornado.gen.Task(http_client.fetch, req)
         except Exception as e:
-            logging.error(e)
+            logger.error(e)
             self.render("templates/error.html", **{"mode": options.mode})
 
         try:
@@ -138,10 +139,10 @@ class DonateHandler(tornado.web.RequestHandler):
             else:
                 raise Exception("Unexpected response body") # force exception
         except Exception as e:
-            logging.error(e)
-            logging.error("Response body: %r" % response.body)
-            logging.error("Raw response: %r" % response)
-            logging.error("Email: %s" % email)
+            logger.error(e)
+            logger.error("Response body: %r" % response.body)
+            logger.error("Raw response: %r" % response)
+            logger.error("Email: %s" % email)
             self.render("templates/error.html", **{"mode": options.mode})
 
 

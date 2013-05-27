@@ -27,6 +27,7 @@
 }
 
 .logo-australia {
+  display: block;
   font-size: .65em;
   color: #333;
   white-space: nowrap;

@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-    
-    <head>
+    <head lang='en'>
       <meta charset='utf-8'>
       <meta name="viewport" content="width=device-width,initial-scale=1">
         <title>Donate</title>
@@ -142,10 +141,10 @@
 <div style="min-height: 80px">
 <h1>
 <a href="http://pirateparty.org.au" class="logo">
-<div>
+<span>
 <span class="logo-bold-blue">pirate</span>party
-</div>
-<div class="logo-australia">Donation Portal</div>
+</span>
+<span class="logo-australia">Donation Portal</span>
 </a>
 </h1>
 </div>
@@ -177,129 +176,144 @@
                   </div>
                 </div>
                 <div class="row">
-                    <div class='span12'>
-                    <h2>Billing Details</h2>
-                            <div class="control-group">
-                                <label class="control-label" for="address_line1">Address</label>
-                                <div class="controls">
-                                    <input type="text" class="span6" id="address_line1">
-                                    <span class="help-inline">Address cannot be blank.</span>
-                                </div>
-                            </div>
-                            <div class="control-group">
-                                <label class="control-label" style="display:none" for="address_line2">Address - line 2</label>
-                                <div class="controls">
-                                    <input type="text" class="span6" placeholder="(optional)" id="address_line2">
-                                </div>
-                            </div>
-                            <div class='row'>
-                                <div class='span2'>
-                                    <div class="control-group">
-                                        <label class="control-label" for="address_city">Suburb</label>
-                                        <div class="controls">
-                                            <input type="text" class="span2" id="address_city">
-                                            <span class="help-inline">Suburb cannot be blank.</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="span1">
-                                    <div class="control-group">
-                                        <label class="control-label" for="address_state">State</label>
-                                        <div class="controls">
-                                            <input type="text" class="span1" id="address_state">
-                                            <span class="help-inline">State cannot be blank.</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="span1">
-                                    <div class="control-group">
-                                        <label class="control-label" for="address_postcode">Postcode</label>
-                                        <div class="controls">
-                                            <input type="text" class="span1" id="address_postcode">
-                                            <span class="help-inline">Postcode cannot be blank.</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="control-group">
-                                <label class="control-label" for="address_country">Country</label>
-                                <div class="controls">
-                                    <input type="text" class="span3" id="address_country" value="Australia">
-                                    <span class="help-inline">Country cannot be blank.</span>
-                                </div>
-                            </div>
-                            <div class="control-group">
-                                <label class="control-label" for="email">Email</label>
-                                <div class="controls">
-                                    <input type="email" id="email" name="email" class="span3">
-                                    <span class="help-inline">Email address cannot be blank.</span>
-                                </div>
-                            </div>
+                  <div class="span6">
+                    <div class="control-group">
+                      <label for='comment'>Comment <small>(optional)</small></label>
+                      <div class='controls'>
+                        <textarea class="span6" id="comment"></textarea>
+                      </div>
                     </div>
+                  </div>
                 </div>
+
                 <div class="row">
                     <div class='span12'>
+                      <h2>Billing Details</h2>
+                      <div class="control-group">
+                          <label class="control-label" for="address_line1">Address</label>
+                          <div class="controls">
+                              <input type="text" class="span6" id="address_line1">
+                              <span class="help-inline">Address cannot be blank.</span>
+                          </div>
+                      </div>
+                      <div class="control-group">
+                          <label class="control-label" style="display:none" for="address_line2">Address - line 2</label>
+                          <div class="controls">
+                              <input type="text" class="span6" placeholder="(optional)" id="address_line2">
+                          </div>
+                      </div>
+                      <div class='row'>
+                          <div class='span2'>
+                              <div class="control-group">
+                                  <label class="control-label" for="address_city">Suburb</label>
+                                  <div class="controls">
+                                      <input type="text" class="span2" id="address_city">
+                                      <span class="help-inline">Suburb cannot be blank.</span>
+                                  </div>
+                              </div>
+                          </div>
+                          <div class="span1">
+                              <div class="control-group">
+                                  <label class="control-label" for="address_state">State</label>
+                                  <div class="controls">
+                                      <input type="text" class="span1" id="address_state">
+                                      <span class="help-inline">State cannot be blank.</span>
+                                  </div>
+                              </div>
+                          </div>
+                          <div class="span1">
+                              <div class="control-group">
+                                  <label class="control-label" for="address_postcode">Postcode</label>
+                                  <div class="controls">
+                                      <input type="text" class="span1" id="address_postcode">
+                                      <span class="help-inline">Postcode cannot be blank.</span>
+                                  </div>
+                              </div>
+                          </div>
+                      </div>
+                      <div class="control-group">
+                          <label class="control-label" for="address_country">Country</label>
+                          <div class="controls">
+                              <input type="text" class="span3" id="address_country" value="Australia">
+                              <span class="help-inline">Country cannot be blank.</span>
+                          </div>
+                      </div>
+                      <div class="control-group">
+                          <label class="control-label" for="email">Email</label>
+                          <div class="controls">
+                              <input type="email" id="email" name="email" class="span3">
+                              <span class="help-inline">Email address cannot be blank.</span>
+                          </div>
+                      </div>
+                   </div>
+                </div>
+                <div class="row">
+                  <div class='span12'>
                     <h2>Credit/Debit Card Details</h2>
-                            <div class="control-group">
-                                <label class="control-label" for="number">Credit/Debit Card Number</label>
-                                <div class="controls">
-                                    <input type="text" class="span4" id="number">
-                                    <span class="help-inline">Please enter a valid number.</span>
-                                </div>
-                            </div>
-                            <div class="control-group">
-                                <label class="control-label" for="name">Full Name</label>
-                                <div class="controls">
-                                    <input type="text" class="span4" id="name">
-                                    <span class="help-inline">Full name cannot be blank.</span>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="span1">
-                                    <div class="control-group">
-                                        <label class="control-label" for="expiry_month">Month</label>
-                                        <div class="controls">
-                                            <select id="expiry_month" class="span1">
-                                                <option value="01">01</option>
-                                                <option value="02">02</option>
-                                                <option value="03">03</option>
-                                                <option value="04">04</option>
-                                                <option value="05">05</option>
-                                                <option value="06">06</option>
-                                                <option value="07">07</option>
-                                                <option value="08">08</option>
-                                                <option value="09">09</option>
-                                                <option value="10">10</option>
-                                                <option value="11">11</option>
-                                                <option value="12">12</option>
-                                            </select>
-                                            <span class="help-inline">Select the correct date.</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="span1">
-                                    <div class="control-group">
-                                        <label class="control-label" for="expiry_year">Year</label>
-                                        <div class="controls">
-                                            <select id="expiry_year" class="span1"></select>
-                                            <span class="help-inline">Select the correct date.</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="span3">
-                                    <div class="control-group">
-                                        <label class="control-label" for="cvc">CVV</label>
-                                        <div class="controls">
-                                            <input type="text" class="span1" id="cvc" title="This 3-digit code can be found on the back of your credit/debit card.">
-                                            <span class="help-inline">Enter a valid CVV/CVC.</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="alert flat alert-danger" style="text-align: center">
-                              <input type="submit" value="Submit" class="btn btn-primary">
-                            </div>
+                    <div class="row">
+                      <div class="span3">
+                        <div class="control-group">
+                          <label class="control-label" for="number">Credit/Debit Card Number</label>
+                          <div class="controls">
+                            <input type="text" class="span3" id="number">
+                            <span class="help-inline">Please enter a valid number.</span>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="span1">
+                        <div class="control-group">
+                          <label class="control-label" for="cvc">CVV</label>
+                          <div class="controls">
+                            <input type="text" class="span1" id="cvc" title="This 3-digit code can be found on the back of your credit/debit card.">
+                            <span class="help-inline">Enter a valid CVV/CVC.</span>
+                          </div>
+                        </div>
+                      </div>
                     </div>
+                    
+                    <div class="row">
+                      <div class="span3">
+                        <div class="control-group">
+                          <label class="control-label" for="expiry_month">Expiration Date</label>
+                          <div class="controls">
+                            <select id="expiry_month" class="span1">
+                              <option value="">Month</option>
+                              <option value="01">01</option>
+                              <option value="02">02</option>
+                              <option value="03">03</option>
+                              <option value="04">04</option>
+                              <option value="05">05</option>
+                              <option value="06">06</option>
+                              <option value="07">07</option>
+                              <option value="08">08</option>
+                              <option value="09">09</option>
+                              <option value="10">10</option>
+                              <option value="11">11</option>
+                              <option value="12">12</option>
+                            </select>
+                            <select id="expiry_year" class="span1">
+                              <option value="">Year</option>
+                            </select>
+                            <span class="help-inline">Select a valid date.</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="row">
+                      <div class="span3">
+                        <div class="control-group">
+                          <label class="control-label" for="name">Cardholder's Name</label>
+                          <div class="controls">
+                            <input type="text" class="span3" id="name">
+                            <span class="help-inline">Name cannot be blank.</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="alert flat alert-danger" style="text-align: center">
+                      <input type="submit" value="Submit" class="btn btn-primary">
+                    </div>
+                  </div>
                 </div>
               </form>
               <div class='pull-right'>
@@ -334,6 +348,7 @@
               }
             });
 
+            $("#comment").attr('name', 'comment'); // die spambots!
             $("#loading").modal({backdrop: "static", keyboard: false, show: false})
             $("form").show();
         </script>

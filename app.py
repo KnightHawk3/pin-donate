@@ -91,6 +91,7 @@ class DonateHandler(tornado.web.RequestHandler):
         card_token = self.get_argument('card_token')
         amount = self.get_argument('amount')
         email = self.get_argument('email')
+        comment = self.get_argument('comment', None)
 
         # Convert dollar amount into cents
         amount = str((Decimal(amount) * Decimal(100))
@@ -126,10 +127,14 @@ class DonateHandler(tornado.web.RequestHandler):
         try:
             data = json.loads(response.body.decode())
             if data.get('response'):
-                self.application.settings['receipts'].save(data['response'])
+                o = data['response']
+                if comment is not None:
+                    o['comment'] = comment
+                self.application.settings['receipts'].save(o)
+
                 str_amount = str(Decimal(data['response']['amount']) / Decimal(100))
-                logger.info("Successful payment of $%s: %s" % (
-                    str_amount, data['response']['token']))
+                logger.info("Successful payment of $%s: %s (%s)" % (
+                    str_amount, data['response']['token'], comment))
                 self.render("templates/receipt.html", **{
                     "token": data['response']['token'],
                     "amount": str_amount,

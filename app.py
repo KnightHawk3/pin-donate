@@ -14,52 +14,13 @@ from tornado.web import StaticFileHandler, asynchronous, HTTPError
 from tornado.options import define, options
 from urllib.parse import urlencode
 from log4mongo.handlers import MongoHandler
+from mutiny.mongo import NonceManager
 
 define("port", default=8888, help="Port number")
 define("config", default="./config.json", help="Config file")
 define("mode", default="testing", help="Deployment mode")
 
 logger = logging.getLogger('pindonate')
-
-class Nonce:
-    def __init__(self, **kwargs):
-        if kwargs.get('uuid'):
-            self.uuid = kwargs['uuid']
-            self.expires = kwargs['expires']
-        else:
-            self.uuid = uuid.uuid4()
-            self.expires = datetime.datetime.utcnow() + datetime.timedelta(minutes=kwargs['expires'])
-
-    def has_expired(self):
-        return datetime.datetime.utcnow() > self.expires
-
-
-class NonceManager:
-    def __init__(self, collection):
-        self.collection = collection
-
-    def generate(self):
-        nonce = Nonce(expires=5)
-        self.collection.insert({"uuid": nonce.uuid, "expires": nonce.expires}, safe=True)
-        return nonce
-
-    def consume(self, id):
-        '''Return true if consumed, false is not found or expired'''
-        try:
-            id = uuid.UUID(id)
-        except:
-            logger.debug("%s is invalid" % id)
-            return False
-
-        data = self.collection.find_one({"uuid": id})
-        if data is None:
-            logger.debug("%r not found" % id)
-            return False
-
-        nonce = Nonce(**data)
-        self.collection.remove(data)
-        logger.debug("Expired: %s" % nonce.has_expired())
-        return not nonce.has_expired()
 
 
 class ReceiptManager:
@@ -159,7 +120,7 @@ if __name__ == "__main__":
 
     dbname = settings['db']
     logger.addHandler(MongoHandler(database_name=dbname))
-    settings['nonces'] = NonceManager(pymongo.Connection()[dbname].nonces)
+    settings['nonces'] = NonceManager(pymongo.Connection()[dbname].nonces, logger=logger)
     settings['receipts'] = ReceiptManager(pymongo.Connection()[dbname].receipts)
 
     application = tornado.web.Application([

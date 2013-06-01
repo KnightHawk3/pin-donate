@@ -2,13 +2,13 @@ import json
 import tornado.web
 import tornado.ioloop
 import logging
-import tornado.gen
 import decimal
 import datetime
 import uuid
 import pymongo
 
 from decimal import Decimal
+from tornado import gen
 from tornado.httpclient import AsyncHTTPClient, HTTPRequest
 from tornado.web import StaticFileHandler, asynchronous, HTTPError
 from tornado.options import define, options
@@ -42,11 +42,12 @@ class DonateHandler(tornado.web.RequestHandler):
         })
 
     @asynchronous
-    @tornado.gen.engine
+    @gen.coroutine
     def post(self):
         nonce = self.get_argument('nonce')
         if self.application.settings['nonces'].consume(nonce) is False:
             self.render("templates/expired.html", **{"mode": options.mode})
+            return
 
         ip_address = self.get_argument('ip_address')
         card_token = self.get_argument('card_token')
@@ -72,7 +73,6 @@ class DonateHandler(tornado.web.RequestHandler):
         }
 
         http_client = AsyncHTTPClient()
-
         req = HTTPRequest("https://" + self.application.settings['api_endpoint'] + "/1/charges",
                 method="POST",
                 body=urlencode(body),
@@ -80,10 +80,11 @@ class DonateHandler(tornado.web.RequestHandler):
         )
 
         try:
-            response = yield tornado.gen.Task(http_client.fetch, req)
+            response = yield http_client.fetch(req)
         except Exception as e:
             logger.error(e)
             self.render("templates/error.html", **{"mode": options.mode})
+            return
 
         try:
             data = json.loads(response.body.decode())
@@ -101,10 +102,12 @@ class DonateHandler(tornado.web.RequestHandler):
                     "amount": str_amount,
                     "mode": options.mode
                 })
+                return
             elif data.get('error'):
                 if data['error'] == "invalid_resource":
                     logger.warn("Rejected card: %r" % data)
                     self.render("templates/rejected.html", **{"mode": options.mode})
+                    return
             else:
                 raise Exception("Unexpected response body") # force exception
         except Exception as e:
@@ -112,6 +115,9 @@ class DonateHandler(tornado.web.RequestHandler):
             logger.error("Response body: %r\nRaw response: %r\nEmail: %s" % (
                 response.body, response, email))
             self.render("templates/error.html", **{"mode": options.mode})
+            return
+
+        self.finish()
 
 
 if __name__ == "__main__":

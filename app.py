@@ -121,6 +121,7 @@ if __name__ == "__main__":
     dbname = settings['db']
     logger.addHandler(MongoHandler(database_name=dbname))
     settings['nonces'] = NonceManager(pymongo.Connection()[dbname].nonces, logger=logger)
+    settings['nonces'].clear_expired()
     settings['receipts'] = ReceiptManager(pymongo.Connection()[dbname].receipts)
 
     application = tornado.web.Application([

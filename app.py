@@ -88,11 +88,12 @@ class DonateHandler(tornado.web.RequestHandler):
         try:
             response = yield http_client.fetch(req)
         except Exception as e:
-            logger.error("HTTP client request failed: %r" % e)
-            logger.error(body)
-            logger.error(e.response)
-            self.render("templates/error.html", **{"mode": options.mode})
-            return
+            if e.response.code != '422':
+                logger.error("HTTP client request failed: %r" % e)
+                logger.error(body)
+                logger.error(e.response.body)
+                self.render("templates/error.html", **{"mode": options.mode})
+                return
 
         try:
             data = json.loads(response.body.decode())

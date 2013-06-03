@@ -90,6 +90,7 @@ class DonateHandler(tornado.web.RequestHandler):
         except Exception as e:
             logger.error("HTTP client request failed: %r" % e)
             logger.error(body)
+            logger.error(e.response)
             self.render("templates/error.html", **{"mode": options.mode})
             return
 

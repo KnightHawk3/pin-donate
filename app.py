@@ -55,9 +55,15 @@ class DonateHandler(tornado.web.RequestHandler):
         email = self.get_argument('email')
         comment = self.get_argument('comment', None)
 
-        # Convert dollar amount into cents
-        amount = str((Decimal(amount) * Decimal(100))
-                   .quantize(Decimal('1.'), rounding=decimal.ROUND_DOWN))
+
+        try:
+            # Convert dollar amount into cents
+            amount = str((Decimal(amount) * Decimal(100))
+                     .quantize(Decimal('1.'), rounding=decimal.ROUND_DOWN))
+        except:
+            logger.error("Invalid amount: %s" % amount)
+            self.render("templates/error.html", **{"mode": options.mode})
+            return
 
         currency = "AUD"
         description = "Pirate Party Donation"

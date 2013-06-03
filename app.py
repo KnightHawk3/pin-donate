@@ -85,6 +85,7 @@ class DonateHandler(tornado.web.RequestHandler):
                 auth_username=key
         )
 
+        response = None
         try:
             response = yield http_client.fetch(req)
         except Exception as e:
@@ -94,6 +95,8 @@ class DonateHandler(tornado.web.RequestHandler):
                 logger.error(e.response.body)
                 self.render("templates/error.html", **{"mode": options.mode})
                 return
+            else:
+                response = e.response
 
         try:
             data = json.loads(response.body.decode())

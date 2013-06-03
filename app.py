@@ -83,7 +83,7 @@ class DonateHandler(tornado.web.RequestHandler):
             response = yield http_client.fetch(req)
         except Exception as e:
             logger.error("HTTP client request failed: %r" % e)
-            logger.error(repr(req))
+            logger.error(body)
             self.render("templates/error.html", **{"mode": options.mode})
             return
 
@@ -127,7 +127,7 @@ if __name__ == "__main__":
 
     dbname = settings['db']
     logger.addHandler(MongoHandler(database_name=dbname))
-    settings['nonces'] = NonceManager(pymongo.Connection()[dbname].nonces, logger=logger)
+    settings['nonces'] = NonceManager(pymongo.Connection()[dbname].nonces, expiry=30, logger=logger)
     settings['nonces'].clear_expired()
     settings['receipts'] = ReceiptManager(pymongo.Connection()[dbname].receipts)
 

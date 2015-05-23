@@ -11,12 +11,12 @@
         <link rel="stylesheet" type="text/css" href="/static/style.css">
         <script src="/static/jquery-1.9.1.min.js"></script>
         <script src="/static/bootstrap.min.js"></script>
-        <script src="https://{{api_endpoint}}/pin.js"></script>
+        <script type="text/javascript" src="https://js.stripe.com/v2/"></script>
         <script>
             $(function () {
 
-                Pin.setPublishableKey('{{publishable_key}}');
-                // Now we can call Pin.js on form submission to retrieve a card token and submit
+                Stripe.setPublishableKey('pk_test_RtKK0eU43kyLnmvA1ZpGpD25');
+                // Now we can call Stripe.js on form submission to retrieve a card token and submit
                 // it to the server
 
                 var $form = $('form'),
@@ -35,7 +35,7 @@
                     $submitButton.val("Processing donation...");
                     $("#loading").modal('show');
 
-                    // Fetch details required for the createToken call to Pin
+                    // Fetch details required for the createToken call to Stripe
                     var card = {
                         number: $('#number').val(),
                         name: $('#name').val(),
@@ -71,6 +71,7 @@
                         hasError = true;
                         $("#email").closest(".control-group").addClass("error");
                     }
+                    alert('walking');
                     
                     if (hasError) {
                       $(".error").first().find("input, select").focus();
@@ -81,51 +82,29 @@
                       $("#loading").modal('hide');
                       return;
                     }
+                    alert('running');
 
-                    // Request a token for the card from Pin
-                    Pin.createToken(card, handlePinResponse);
+                    // Request a token for the card from Stripe
+                    Stripe.card.createToken(card, stripeResponseHandler);
                 });
 
-                function handlePinResponse(response) {
-                    var $form = $('form');
+                function stripeResponseHandler(status, response) {
+                  var $form = $('form');
+                  alert('running');
 
-                    if (response.response) {
-                        // Add the card token and ip address of the customer to the form
-                        // You will need to post these to Pin when creating the charge.
-                        $('<input>')
-                            .attr({
-                            type: 'hidden',
-                            name: 'card_token'
-                        })
-                            .val(response.response.token)
-                            .appendTo($form);
-                        $('<input>')
-                            .attr({
-                            type: 'hidden',
-                            name: 'ip_address'
-                        })
-                            .val(response.ip_address)
-                            .appendTo($form);
-
-                        // Resubmit the form
-                        $form.get(0).submit();
-
-                    } else {
-                        $errors.find('h3').text(response.error_description);
-                        $(".error").removeClass('error');
-
-                        $.each(response.messages, function (index, errorMessage) {
-                            var node = $("#" + errorMessage.param);
-                            node.closest(".control-group").addClass("error");
-                        });
-
-                        $submitButton.removeAttr('disabled');
-                        $submitButton.val("Submit");
-                        $("#loading").modal('hide');
-                        $(".error").first().find("input, select").focus();
-                    }
-                };
-
+                  if (response.error) {
+                    // Show the errors on the form
+                    $form.find('.payment-errors').text(response.error.message);
+                    $form.find('button').prop('disabled', false);
+                  } else {
+                    // response contains id and card, which contains additional card details
+                    var token = response.id;
+                    // Insert the token into the form so it gets submitted to the server
+                    $form.append($('<input type="hidden" name="stripeToken" />').val(token));
+                    // and submit
+                    $form.get(0).submit();
+                  }
+                }
                 $("[title]").tooltip({placement: "top", trigger: "focus"});
             });
           </script>
@@ -138,17 +117,16 @@
       </div>
       {% end %}
         <div class="container">
-<div style="min-height: 80px">
-<h1>
-<a href="http://pirateparty.org.au" class="logo">
-<span>
-<span class="logo-bold-blue">pirate</span>party
-</span>
-<span class="logo-australia">Donation Portal</span>
-</a>
-</h1>
-</div>
-<noscript>This form requires JavaScript.</noscript>
+          <div style="min-height: 80px">
+            <h1>
+              <a href="http://pirateparty.org.au" class="logo">
+                <span><span class="logo-bold-blue">pirate</span>party</span>
+                <span class="logo-australia">Donation Portal</span>
+              </a>
+            </h1>
+          </div>
+          <noscript>This form requires JavaScript.</noscript>
+          <span class="payment-error"></span>
           <form method='post' style="display:none">
                 {% if referer %}
                 <input type="hidden" name="referer" value="{{referer}}">
@@ -163,7 +141,7 @@
                       <div class='well'>
                         Please enter a donation amount. ($5 minimum)
                       </div>
-                  </div>
+                  <ediv>
                    <div class="span2">
                      <div class="control-group">
                        <label class="control-label" for="donation-amount"><strong>Donation Amount</strong></label>
@@ -255,7 +233,7 @@
                         <div class="control-group">
                           <label class="control-label" for="number">Credit/Debit Card Number</label>
                           <div class="controls">
-                            <input type="text" class="span3" id="number">
+                            <input type="text" class="span3" data-stripe="number" id="number">
                             <span class="help-inline">Please enter a valid number.</span>
                           </div>
                         </div>
@@ -264,7 +242,7 @@
                         <div class="control-group">
                           <label class="control-label" for="cvc">CVV</label>
                           <div class="controls">
-                            <input type="text" class="span1" id="cvc" title="This 3-digit code can be found on the back of your credit/debit card.">
+                            <input type="text" class="span1" data-stripe="cvc" id="cvc" title="This 3-digit code can be found on the back of your credit/debit card.">
                             <span class="help-inline">Enter a valid CVV/CVC.</span>
                           </div>
                         </div>
@@ -276,24 +254,8 @@
                         <div class="control-group">
                           <label class="control-label" for="expiry_month">Expiration Date</label>
                           <div class="controls">
-                            <select id="expiry_month" class="span1">
-                              <option value="">Month</option>
-                              <option value="01">01</option>
-                              <option value="02">02</option>
-                              <option value="03">03</option>
-                              <option value="04">04</option>
-                              <option value="05">05</option>
-                              <option value="06">06</option>
-                              <option value="07">07</option>
-                              <option value="08">08</option>
-                              <option value="09">09</option>
-                              <option value="10">10</option>
-                              <option value="11">11</option>
-                              <option value="12">12</option>
-                            </select>
-                            <select id="expiry_year" class="span1">
-                              <option value="">Year</option>
-                            </select>
+                            <input type="text" size="2" data-stripe="exp-month"/>
+                            <input type="text" size="4" data-stripe="exp-year"/>
                             <span class="help-inline">Select a valid date.</span>
                           </div>
                         </div>

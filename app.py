@@ -6,6 +6,7 @@ import decimal
 import datetime
 import uuid
 import pymongo
+import stripe
 
 from decimal import Decimal
 from tornado import gen
@@ -20,7 +21,11 @@ define("port", default=8888, help="Port number")
 define("config", default="./config.json", help="Config file")
 define("mode", default="testing", help="Deployment mode")
 
-logger = logging.getLogger('pindonate')
+logger = logging.getLogger('stripedonate')
+
+# Set your secret key: remember to change this to your live secret key in production
+# See your keys here https://dashboard.stripe.com/account/apikeys
+stripe.api_key = "sk_test_BQokikJOvBiI2HlWgH4olfQ2"
 
 
 class ReceiptManager:
@@ -44,7 +49,10 @@ class DonateHandler(tornado.web.RequestHandler):
     @asynchronous
     @gen.coroutine
     def post(self):
+
+        token = self.get_argument('stripeToken')
         nonce = self.get_argument('nonce')
+
         if self.application.settings['nonces'].consume(nonce) is False:
             self.render("templates/expired.html", **{"mode": options.mode})
             return
@@ -55,7 +63,6 @@ class DonateHandler(tornado.web.RequestHandler):
         email = self.get_argument('email')
         comment = self.get_argument('comment', None)
 
-
         try:
             # Convert dollar amount into cents
             amount = str((Decimal(amount) * Decimal(100))
@@ -65,10 +72,9 @@ class DonateHandler(tornado.web.RequestHandler):
             self.render("templates/error.html", **{"mode": options.mode})
             return
 
-        currency = "AUD"
-        description = "Pirate Party Donation"
-        key = self.application.settings['secret_key']
 
+        currency = "aud"
+        description = "Pirate Party Donation"
         body = {
             "email": email,
             "ip_address": ip_address,
@@ -78,55 +84,33 @@ class DonateHandler(tornado.web.RequestHandler):
             "card_token": card_token
         }
 
-        http_client = AsyncHTTPClient()
-        req = HTTPRequest("https://" + self.application.settings['api_endpoint'] + "/1/charges",
-                method="POST",
-                body=urlencode(body),
-                auth_username=key
-        )
-
-        response = None
+        # Create the charge on Stripe's servers - this will charge the user's card
         try:
-            response = yield http_client.fetch(req)
-        except Exception as e:
-            if int(e.response.code) != 422:
-                logger.error("HTTP client request failed: %r" % e)
-                logger.error(body)
-                logger.error(e.response.body)
-                self.render("templates/error.html", **{"mode": options.mode})
-                return
-            else:
-                response = e.response
+            charge = stripe.Charge.create(
+                amount=amount, # amount in cents, again
+                currency=currency,
+                source=token,
+                description=description
+            )
 
-        try:
-            data = json.loads(response.body.decode())
-            if data.get('response'):
-                o = data['response']
-                if comment is not None:
-                    o['comment'] = comment
-                self.application.settings['receipts'].save(o)
+            # self.application.settings['receipts'].save(o)
 
-                str_amount = str(Decimal(data['response']['amount']) / Decimal(100))
-                logger.info("Successful payment of $%s: %s (%s)" % (
-                    str_amount, data['response']['token'], comment))
-                self.render("templates/receipt.html", **{
-                    "token": data['response']['token'],
-                    "amount": str_amount,
-                    "mode": options.mode
-                })
-                return
-            elif data.get('error'):
-                if data['error'] == "invalid_resource":
-                    logger.warn("Rejected card: %r" % data)
-                    self.render("templates/rejected.html", **{"mode": options.mode})
-                    return
-            else:
-                raise Exception("Unexpected response body") # force exception
-        except Exception as e:
-            logger.error(e)
-            logger.error("Response body: %r\nRaw response: %r\nEmail: %s" % (
-                response.body, response, email))
-            self.render("templates/error.html", **{"mode": options.mode})
+            str_amount = str(Decimal(charge.amount) / Decimal(100))
+            logger.info("Successful payment of $%s: %s (%s)" % (
+                str_amount, charge.source.id, comment))
+            self.render("templates/receipt.html", **{
+                "token": charge.source.id,
+                "amount": str_amount,
+                "mode": options.mode
+            })
+        except stripe.error.CardError as e:
+            # The card has been declined
+            body = e.json_body
+            err  = body['error']
+            print("Status is: %s" % e.http_status)
+            print("Type is: %s" % err['type'])
+            logger.warn("Rejected card: %r" % err['code'])
+            self.render("templates/rejected.html", **{"mode": options.mode})
             return
 
         self.finish()

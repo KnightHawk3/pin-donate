@@ -25,7 +25,7 @@ logger = logging.getLogger('stripedonate')
 
 # Set your secret key: remember to change this to your live secret key in production
 # See your keys here https://dashboard.stripe.com/account/apikeys
-stripe.api_key = "sk_test_BQokikJOvBiI2HlWgH4olfQ2"
+stripe.api_key = "sk_test_agShWnjOFPmnU1jQeM501Smd"
 
 
 class ReceiptManager:
@@ -57,8 +57,6 @@ class DonateHandler(tornado.web.RequestHandler):
             self.render("templates/expired.html", **{"mode": options.mode})
             return
 
-        ip_address = self.get_argument('ip_address')
-        card_token = self.get_argument('card_token')
         amount = self.get_argument('amount')
         email = self.get_argument('email')
         comment = self.get_argument('comment', None)
@@ -77,11 +75,9 @@ class DonateHandler(tornado.web.RequestHandler):
         description = "Pirate Party Donation"
         body = {
             "email": email,
-            "ip_address": ip_address,
             "description": description,
             "amount": amount,
             "currency": currency,
-            "card_token": card_token
         }
 
         # Create the charge on Stripe's servers - this will charge the user's card
@@ -105,7 +101,6 @@ class DonateHandler(tornado.web.RequestHandler):
             })
         except stripe.error.CardError as e:
             # The card has been declined
-            body = e.json_body
             err  = body['error']
             print("Status is: %s" % e.http_status)
             print("Type is: %s" % err['type'])

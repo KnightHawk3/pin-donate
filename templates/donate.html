@@ -13,101 +13,39 @@
         <script src="/static/bootstrap.min.js"></script>
         <script type="text/javascript" src="https://js.stripe.com/v2/"></script>
         <script>
-            $(function () {
+          // This identifies your website in the createToken call below
+          Stripe.setPublishableKey('pk_test_RtKK0eU43kyLnmvA1ZpGpD25');
 
-                Stripe.setPublishableKey('pk_test_RtKK0eU43kyLnmvA1ZpGpD25');
-                // Now we can call Stripe.js on form submission to retrieve a card token and submit
-                // it to the server
+          var stripeResponseHandler = function(status, response) {
+            var $form = $('#payment-form');
+            if (response.error) {
+              // Show the errors on the form
+              $form.find('.payment-errors').text(response.error.message);
+              $form.find('button').prop('disabled', false);
+            } else {
+              // token contains id, last4, and card type
+              var token = response.id;
+              // Insert the token into the form so it gets submitted to the server
+              $form.append($('<input type="hidden" name="stripeToken" />').val(token));
+              // and re-submit
+              $form.get(0).submit();
+            }
+          };
 
-                var $form = $('form'),
-                    $submitButton = $form.find(":submit"),
-                    $errors = $form.find('.errors');
+          jQuery(function($) {
+            $('#payment-form').submit(function(e) {
+              var $form = $(this);
 
-                $form.submit(function (e) {
+              // Disable the submit button to prevent repeated clicks
+              $form.find('button').prop('disabled', true);
 
-                    e.preventDefault();
-                    $errors.hide();
-
-                    // Disable the submit button to prevent multiple clicks
-                    $submitButton.attr({
-                        disabled: true
-                    });
-                    $submitButton.val("Processing donation...");
-                    $("#loading").modal('show');
-
-                    // Fetch details required for the createToken call to Stripe
-                    var card = {
-                        number: $('#number').val(),
-                        name: $('#name').val(),
-                        expiry_month: $('#expiry_month').val(),
-                        expiry_year: $('#expiry_year').val(),
-                        cvc: $('#cvc').val(),
-                        address_line1: $('#address_line1').val(),
-                        address_line2: $('#address_line2').val(),
-                        address_city: $('#address_city').val(),
-                        address_state: $('#address_state').val(),
-                        address_postcode: $('#address_postcode').val(),
-                        address_country: $('#address_country').val()
-                    };
-
-                    var hasError = false;
-                    for (var prop in card) {
-                      if (card[prop] == null || card[prop] === "") {
-                        if (prop == "address_line2") {
-                          continue;
-                        }
-                        hasError = true;
-                        $("#" + prop).closest(".control-group").addClass("error");
-                      }
-                    }
-
-                    if ($("#donation-amount").val() == "" || $("#donation-amount").val() == null ||
-                          parseFloat($("#donation-amount").val()) < 5) {
-                        hasError = true;
-                        $("#donation-amount").closest(".control-group").addClass("error");
-                    }
-                    
-                    if ($("#email").val() == "" || $("#email").val() == null) {
-                        hasError = true;
-                        $("#email").closest(".control-group").addClass("error");
-                    }
-                    alert('walking');
-                    
-                    if (hasError) {
-                      $(".error").first().find("input, select").focus();
-                      $submitButton.attr({
-                        disabled: false
-                      });
-                      $submitButton.val("Submit");
-                      $("#loading").modal('hide');
-                      return;
-                    }
-                    alert('running');
-
-                    // Request a token for the card from Stripe
-                    Stripe.card.createToken(card, stripeResponseHandler);
-                });
-
-                function stripeResponseHandler(status, response) {
-                  var $form = $('form');
-                  alert('running');
-
-                  if (response.error) {
-                    // Show the errors on the form
-                    $form.find('.payment-errors').text(response.error.message);
-                    $form.find('button').prop('disabled', false);
-                  } else {
-                    // response contains id and card, which contains additional card details
-                    var token = response.id;
-                    // Insert the token into the form so it gets submitted to the server
-                    $form.append($('<input type="hidden" name="stripeToken" />').val(token));
-                    // and submit
-                    $form.get(0).submit();
-                  }
-                }
-                $("[title]").tooltip({placement: "top", trigger: "focus"});
+              Stripe.card.createToken($form, stripeResponseHandler);
+              // Prevent the form from submitting with the default action
+              return false;
             });
-          </script>
+          });
+
+        </script>
     </head>
     
     <body>
@@ -126,22 +64,25 @@
             </h1>
           </div>
           <noscript>This form requires JavaScript.</noscript>
-          <span class="payment-error"></span>
-          <form method='post' style="display:none">
+          <form method='post' style="display:none" id="payment-form">
                 {% if referer %}
                 <input type="hidden" name="referer" value="{{referer}}">
                 {% end %}
+                <span class="payment-errors"></span>
+
                 <input type="hidden" name="nonce" value="{{nonce.uuid.hex}}">
+
                 <div class="alert flat alert-info">
                   Thanks for donating to the Pirate Party!<br><br>
                   All fields are mandatory unless otherwise specified.
                 </div>
+
                 <div class="row">
                   <div class='span6'>
                       <div class='well'>
                         Please enter a donation amount. ($5 minimum)
                       </div>
-                  <ediv>
+                  <div>
                    <div class="span2">
                      <div class="control-group">
                        <label class="control-label" for="donation-amount"><strong>Donation Amount</strong></label>
@@ -277,25 +218,16 @@
                     </div>
                   </div>
                 </div>
-              </form>
-              <div class='pull-right'>
-                
-                <a target="_blank" href="http://pirateparty.org.au/privacy">Privacy Policy</a>
-                |
-                <a target="_blank" href="http://pirateparty.org.au/contact">Contact Us</a>
-              </div>
-        </div>
-        <div id='loading' class='modal hide fade'>
-          <div class='modal-header'>
-            <h3>Processing transaction...</h3>
-          </div>
-          <div class='modal-body'>
-            <p><strong>Please wait.</strong> This can take up to 30 seconds, and may take even longer on mobile devices.</p>
-            <div class="progress progress-striped active">
-              <div class="bar" style="width: 100%"></div>
-            </div>
+          </form>
+
+          <div class='pull-right'>
+            
+            <a target="_blank" href="http://pirateparty.org.au/privacy">Privacy Policy</a>
+            |
+            <a target="_blank" href="http://pirateparty.org.au/contact">Contact Us</a>
           </div>
         </div>
+
         <script>
             var thisYear = new Date().getFullYear(),
                 node = $("#expiry_year");
